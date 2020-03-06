@@ -1,0 +1,38 @@
+import pandas as pd
+import csv,io
+from scipy import sparse
+
+ratings = pd.read_csv("C:/Users/Admin/Desktop/CPL/DjangoProject/mac/dataset/ratings.csv")
+movies = pd.read_csv('C:/Users/Admin/Desktop/CPL/DjangoProject/mac/filename.csv')
+ratings = pd.merge(movies, ratings).drop(['genres', 'timestamp'], axis=1)
+ratings.head()
+
+# ratings
+userRatings = ratings.pivot_table(index=['userId'], columns=['title'], values='rating')
+userRatings.head()
+# print("Before: ",userRatings.shape)
+# userRatings = userRatings.dropna(thresh=10, axis=1).fillna(0,axis=1)
+#userRatings.fillna(0, inplace=True)
+# print("After: ",userRatings.shape)
+
+
+corrMatrix = userRatings.corr(method='pearson')
+corrMatrix.head(100)
+
+
+def get_similar(movie_name,rating):
+    similar_ratings = corrMatrix[movie_name]*(rating-2.5)
+    similar_ratings = similar_ratings.sort_values(ascending=False)
+    #print(type(similar_ratings))
+    return similar_ratings
+
+
+romantic_lover = [('Housefull 4 (2019)',5)]
+similar_movies = pd.DataFrame()
+for movie,rating in romantic_lover:
+    similar_movies = similar_movies.append(get_similar(movie, rating), ignore_index=True)
+
+similar_movies.head(10)
+# df = get_similar('Kabir Singh (2019)',5)
+# print(df)
+
